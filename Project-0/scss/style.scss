@@ -13,6 +13,15 @@ html,body {
     font-size:14px;
 }
 
+.logo-subtext {
+    color: #4285f4;
+    font: 16px/16px roboto-regular, arial, sans-serif;
+    left: 90px;
+    position: relative;
+    top: -15px;
+    white-space: nowrap;
+}
+
 div {
     text-align: center;
 }
@@ -31,6 +40,11 @@ input {
     border: 1px solid #dfe1e5;
     box-shadow: none;
     height: 40px;
+    padding: 20px;
+}
+
+#searchBar:focus {
+    outline:none;
 }
 
 .graybutton {
