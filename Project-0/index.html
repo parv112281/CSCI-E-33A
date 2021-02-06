@@ -6,15 +6,23 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <p>
-            <a href="image-search.html">Image Search</a>
-        </p>
-        <p>
-            <a href="advanced-search.html">Advanced Search</a>
-        </p>
-        <form action="https://google.com/search">
-            <input id="searchBar" type="text" name="q"> <br />
-            <input type="submit" value="Google Search">
-        </form>
+        <div class="d-flex flex-row-reverse">
+            <a class="search_links" href="advanced-search.html">
+                <p>Advanced Search</p>
+            </a>
+            <a class="search_links" href="image-search.html">
+                <p>Image Search</p>
+            </a>
+        </div>
+        <div class="row h-100">
+            <div class="col-12" id="form_container">
+                <img width="200px" src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"><br />
+                <form action="https://google.com/search">
+                    <input id="searchBar" type="text" name="q"> <br />
+                    <input class="graybutton" type="submit" value="Google Search">
+                    <input class="graybutton" type="submit" name="btnI" value="I'm Feeling Lucky"> <!-- https://www.google.com/search?q=weather&btnI=I%27m+Feeling+Lucky -->
+                </form>
+            </div>
+        </div>
     </body>
 </html>

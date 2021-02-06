@@ -1,12 +1,19 @@
-p {
-    text-align: right;
+html,body {
+    height:100%;
 }
 
-body {
-    padding: 20px;
+.search_links {
+    display: inline-block;
+    line-height:24px;
+    vertical-align:middle;
+    color: rgba(0,0,0,0.87);
+    text-decoration: none;
+    font-family: arial,sans-serif;
+    padding-right: 15px;
+    font-size:14px;
 }
 
-form {
+div {
     text-align: center;
 }
 
@@ -14,6 +21,34 @@ input {
     margin:2px;
 }
 
+#form_container {
+    margin-top:20%;
+}
+
 #searchBar {
     width: 400px;
+    border-radius: 24px;
+    border: 1px solid #dfe1e5;
+    box-shadow: none;
+    height: 40px;
+}
+
+.graybutton {
+    background-color: #f8f9fa;
+    border: 1px solid #f8f9fa;
+    border-radius: 4px;
+    color: #3c4043;
+    font-family: arial,sans-serif;
+    font-size: 14px;
+    margin: 11px 4px;
+    padding: 0 16px;
+    line-height: 27px;
+    height: 36px;
+    min-width: 54px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.graybutton:hover {
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
 }
