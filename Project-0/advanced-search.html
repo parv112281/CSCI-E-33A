@@ -1,13 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Search</title>
+        <title>Advanced Search</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="css\style.css">
     </head>
     <body>
-    <a href="index.html">Google Search</a>
+        <div class="row title_bar">
+            <div class="col-2 align-self-center">
+                <img width="70px" src="img/google_logo.png">
+            </div>
+            <div class="col-7">
+                
+            </div>
+            <div class="col-3 align-self-center">
+                <a class="search_links" href="index.html">
+                    <p>
+                        Basic Search
+                    </p>
+                </a>
+            </div>
+        </div>
+        <div class="row subtitle">
+            Advanced Search
+        </div>
+        <hr/>
+        <div class="row form_container">
+            <span id="input_header">
+                 Find pages with..
+            </span>
+        </div>
         <form action="https://google.com/search">
-            <input type="text" name="q">
-            <input type="submit" value="Google Search">
+            <div class="row form_container">
+                <span class="input_label">
+                    all these words:
+                </span>
+                <input class="adv_input" type="text" name="as_q">
+            </div>
+            <div class="row form_container">
+                <span class="input_label">
+                    this exact word or phrase:
+                </span>
+                <input class="adv_input" type="text" name="as_epq">
+            </div>
+            <div class="row form_container">
+                <span class="input_label">
+                    any of these words:
+                </span>
+                <input class="adv_input" type="text" name="as_oq">
+            </div>
+            <div class="row form_container">
+                <span class="input_label">
+                    none of these words:
+                </span>
+                <input class="adv_input" type="text" name="as_eq">
+            </div>
+            <div class="row form_container">
+                <span class="input_label">
+                    
+                </span>
+                <input id="bluebutton" type="submit" value="Advanced Search">
+            </div>
         </form>
     </body>
 </html>
