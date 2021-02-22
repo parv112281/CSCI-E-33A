@@ -1,0 +1,26 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    {% if new_entry %}
+        Create Entry
+    {% else %}
+        Edit Entry
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <h1>
+        {% if new_entry %}
+            Create Entry
+        {% else %}
+            Edit Entry
+        {% endif %}
+    </h1>
+
+    <form action="{% if new_entry %}{% url 'encyclopedia:add' %}{% else %}{% url 'encyclopedia:edit' title %}{% endif %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit">
+    </form>
+
+{% endblock %}
