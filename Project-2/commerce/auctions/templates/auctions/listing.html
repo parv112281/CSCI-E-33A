@@ -1,0 +1,112 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block body %}
+
+<h2>{{ title }}</h2>
+<div>
+    
+    {% if is_watched %}
+        <a href="{% url 'stop_watching' listing_id %}">
+            Stop Watching
+        </a>
+    {% else %}
+        <a href="{% url 'watch_item' listing_id %}">
+            Start Watching
+        </a>
+    {% endif %}
+        
+</div>
+<div>
+    
+    {% if image_url %}
+        <img src="{{ image_url }}" alt="">
+    {% endif %}
+    
+</div>
+<div>
+    {{ description }}
+</div>
+
+<div>
+    <h4>{{ price }}</h4>
+</div>
+
+<div>
+    
+    {% if is_active %}
+        {{ bid_count }} bid(s) so far.
+        {% if is_owner %}
+            <br />
+            <a href="{% url 'close_listing' listing_id %}">Close Listing</a>
+        {% else %}
+            
+            {% if is_high_bidder %}
+                Your bid is the current bid.
+            {% endif %}
+
+            {% if message %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+            {% endif %}
+
+            <form action="{% url 'place_bid' listing_id %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input class="form-control" autofocus type="text" name="bid_amount" placeholder="Bid">
+                </div>
+                <input class="btn btn-primary" type="submit" value="Place Bid">
+            </form>
+        {% endif %}
+    {% else %}
+        This listing is closed.
+        
+        {% if is_high_bidder %}
+            You have won this listing.            
+        {% endif %}
+        
+    {% endif %}
+    
+</div>
+
+<h4>Details</h4>
+<ul>
+    <li>
+        Listed by: {{ owner_name }}
+    </li>
+    <li>
+        Category: {{ category }}
+    </li>
+</ul>
+
+<h4>Comments</h4>
+<ul>
+    {% for comment in comments %}
+        <li>
+            <h5>{{ comment.0 }}</h5>
+            <div>{{ comment.1 }}</div>
+            <div>author: {{ comment.2 }}</div>
+        </li>
+    {% endfor %}
+    
+    {% if user.is_authenticated %}
+        <h5>Submit Comment Form</h5>
+        <form action="{% url 'submit_comment' listing_id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input class="form-control" type="text" name="title" placeholder="Title">
+            </div>
+            <div class="form-group">
+                <input class="form-control" type="text" name="body" placeholder="Comment">
+            </div>
+            <input class="btn btn-primary" type="submit" value="Submit Comment">
+        </form>
+    {% endif %}
+        
+</ul>
+
+
+    
+{% endblock body %}
+    
