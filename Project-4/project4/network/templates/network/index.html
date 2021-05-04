@@ -1,0 +1,410 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+    <div id="app"></div>
+
+    <script type="text/babel">
+
+        class NewPostApp extends React.Component {
+
+            constructor(props) {
+                super(props);
+                this.state = {
+                    creating_post: false,
+                    message: ""
+                };
+            }
+
+            render() {
+                if (this.state.creating_post === true) {
+                    return (
+                        <div>
+                            <div className="form-group">
+                                <label id="newPostLabel" htmlFor="newPostText">New Post</label>
+                                <textarea className="form-control" id="newPostText" rows="3" onChange={this.update_message} value={this.state.message} autoFocus={true}></textarea>
+                                <button className="btn btn-primary" onClick={this.submit_post}>Submit</button>
+                            </div>
+                        </div>
+                    );
+                }
+                return (
+                    <div>
+                        
+                        {% if user.is_authenticated %}
+                            <button type="button" className="btn btn-primary" onClick={this.toggle_state}>New Post</button>
+                        {% endif %}
+                        
+                    </div>
+                );
+            }
+
+            toggle_state = () => {
+                this.setState(state => ({
+                    creating_post: !state.creating_post
+                }));
+            }
+
+            update_message = (event) => {
+                this.setState({
+                    message: event.target.value
+                })
+            }
+
+            submit_post = () => {
+                const req_body = JSON.stringify({
+                    "message": this.state.message
+                });
+                console.log("req_body: " + req_body)
+                fetch('/posts/create', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        "message": this.state.message
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    this.props.newMessageCallback(result);
+                    this.state.message = "";
+                    this.toggle_state();
+                });
+            }
+        }
+
+        class PaginatedPosts extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    posts: [],
+                    username: null,
+                    currPage: 1,
+                    numPages: 1,
+                    interval: null,
+                    refreshing: true
+                };
+            }
+
+            componentDidMount(){
+                const interval = setInterval(() => {
+                    if (this.state.refreshing) {
+                        this.fetch_posts();
+                    }
+                }, 5000);
+                this.setState({
+                    username: this.props.username,
+                    interval: interval
+                }, () => {
+                    this.fetch_posts();
+                });
+                
+            }
+
+            componentWillUnmount() {
+                clearInterval(this.state.interval);
+            }
+
+            componentWillReceiveProps(nextProps) {
+                this.setState({ username: this.props.username });  
+            }
+
+            fetch_posts = () => {
+                var url = '/posts/';
+                if (this.state.username) {
+                    url += this.state.username + '/';
+                }
+                url += this.state.currPage;
+                console.log(url);
+                fetch(url)
+                .then(response => response.json())
+                .then(new_posts => {
+                    this.setState({
+                        posts: new_posts.posts,
+                        numPages: new_posts.num_pages
+                    });
+                    console.log(new_posts);
+                });
+            }
+
+            previous_page = () => {
+                this.setState(state => ({
+                    currPage: state.currPage - 1
+                }), () => this.fetch_posts());
+            }
+
+            next_page = () => {
+                this.setState(state => ({
+                    currPage: state.currPage + 1
+                }), () => this.fetch_posts());
+            }
+
+            pagination = () => {
+                return (
+                    <nav aria-label="...">
+                        <ul className="pagination">
+                            {this.state.currPage > 1 && <li className="page-item" >
+                                <a className="page-link" href="#" onClick={this.previous_page}>Previous</a>
+                            </li>}
+                            {this.state.currPage < this.state.numPages && <li className="page-item">
+                                <a className="page-link" href="#" onClick={this.next_page}>Next</a>
+                            </li>}
+                        </ul>
+                    </nav>
+                );
+            }
+
+            handleEdits = (post) => {
+                let message_element = document.querySelector('#post_' + post.id)
+                message_element.innerHTML = "<textarea id='textarea_" 
+                    + post.id + "'>" 
+                    + post.message + "</textarea>";
+                let editBtn = document.querySelector('#edit_btn_' + post.id);
+                editBtn.innerHTML = "Submit";
+                editBtn.onclick = () => {
+                    const new_message = document.querySelector("#textarea_" + post.id).value;
+                    console.log(new_message);
+                    let url = '/posts/' + post.id + '/update';
+                    fetch(url, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            message: new_message
+                        })
+                    })
+                    .then(response => {
+                        console.log(response);
+                        post.message = new_message
+                        message_element.innerHTML = post.message;
+                        editBtn.innerHTML = "Edit";
+                        editBtn.removeAttribute('onclick');
+                        this.setState({
+                            refreshing: true
+                        });
+                    }) 
+                };
+            }
+
+            editButton = (post) => {
+                return (
+                    <button className="btn btn-primary"
+                        id = {'edit_btn_' + post.id}
+                        onClick={() => {
+                            if (this.state.refreshing) {
+                                this.setState({
+                                    refreshing: false
+                                }, () => {
+                                    this.handleEdits(post);
+                                });
+                            }}}>
+                        Edit
+                    </button>
+                );
+            }
+
+            likePost = (post) => {
+                console.log('in likePost');
+                if (!(post.allow_edit || post.liked)) {
+                    let url = '/posts/' + post.id + '/like';
+                    fetch(url, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            id: post.id
+                        })
+                    })
+                    .then(response => {
+                        console.log(response);
+                        post.number_likes += 1;
+                    })
+                }
+            }
+
+            render() {
+                return (
+                    <div>
+                        <ul className="list-group">
+                            {
+                                this.state.posts.map(post => (
+                                    <li className="list-group-item" key={post.id}>
+                                        <div onClick={() => this.props.displayProfileCallback(post)}>
+                                            {post.user}
+                                        </div>
+                                        <div id={"post_" + post.id}>
+                                            {post.message}
+                                        </div>
+                                        <div>
+                                            {post.created_on}
+                                        </div>
+                                        <div onClick={() => this.likePost(post)}>
+                                            &#10084;{post.number_likes}
+                                        </div>
+                                        <div>
+                                            {post.allow_edit && 
+                                                this.editButton(post)}
+                                        </div>
+                                    </li>
+                                ))
+                            }
+                        </ul>
+                        {this.pagination()}
+                    </div>
+                );
+            }
+        }
+
+        class AllPostsApp extends React.Component {
+
+            constructor(props) {
+                super(props);
+            }
+
+            componentWillReceiveProps(nextProps) {
+            }
+
+            render() {
+                return (
+                    <div>
+                        <ul className="list-group">
+                            {
+                                <PaginatedPosts username={null} displayProfileCallback = {this.props.displayProfileCallback} />
+                            }
+                        </ul>
+                    </div>
+                )
+            }
+        }
+
+        class ProfileApp extends React.Component {
+
+            constructor(props) {
+                super(props);
+                this.state = {
+                    profile_username: this.props.profile_username
+                }
+            }
+
+            componentDidMount() {
+                this.fetch_profile();
+            }
+
+            componentWillReceiveProps(nextProps) {
+                this.setState({ profile_username: nextProps.profile_username });  
+            }
+
+            fetch_profile() {
+                var url = 'user/' + this.state.profile_username;
+                fetch(url)
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result);
+                    this.setState({
+                        profile: result
+                    });
+                });
+            }
+
+            follow() {
+                this.update_follow(true);
+            }
+
+            unfollow() {
+                this.update_follow(false);
+            }
+
+            update_follow(status) {
+                var url = 'user/' + this.state.profile.username;
+                if (status) {
+                    url += '/follow';
+                } else {
+                    url += '/unfollow';
+                }
+                fetch(url)
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result);
+                    let new_profile = this.state.profile;
+                    console.log(new_profile);
+                    new_profile.is_followed = !this.state.profile.is_followed;
+                    if (status) {
+                        new_profile.num_followers += 1;
+                    } else {
+                        new_profile.num_followers -= 1;
+                    }
+                    console.log(new_profile);
+                    this.setState({
+                        profile: new_profile
+                    });
+                })
+            }
+
+            render() {
+                var button = <span></span>;
+                if (this.state.profile) {
+                    if (this.state.profile.current_username !== this.state.profile.username) {
+                        if (this.state.profile.is_followed) {
+                            button = <button className="btn btn-primary" onClick={() => this.unfollow()}>Unfollow</button>;
+                        } else {
+                            button = <button className="btn btn-primary" onClick={() => this.follow()}>Follow</button>;
+                        }
+                    }
+                    return (
+                        <div>
+                            <div>
+                                Followers: {this.state.profile.num_followers}
+                            </div>
+                            <div>
+                                Follows: {this.state.profile.follows}
+                            </div>
+                            <div>{button}</div>
+                            <PaginatedPosts username={this.state.profile_username} displayProfileCallback = {this.props.displayProfileCallback} />
+                        </div>)
+                } else {
+                    return (<div></div>)
+                }
+                
+            }
+        }       
+        
+        class App extends React.Component {
+
+            constructor(props) {
+                super(props);
+                this.state = {
+                    profile_username: null,
+                };
+            }
+
+            componentDidMount(){
+            }
+
+            addNewMessage = (post) => {
+                console.log('new message added: ' + post);
+            }
+
+            displayProfile = (post) => {
+                console.log(post);
+                this.setState({
+                    profile_username: post.user
+                });
+            }
+
+            render() {
+                if(this.state.profile_username) {
+                    return (
+                        <div>
+                            <ProfileApp profile_username={this.state.profile_username} />
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div>
+                            <NewPostApp newMessageCallback = {this.addNewMessage} />
+                            <AllPostsApp displayProfileCallback = {this.displayProfile} />
+                        </div>
+                    );
+                }
+            }
+        }
+
+        ReactDOM.render(<App />, document.querySelector("#app"));
+
+    </script>  
+
+{% endblock %}

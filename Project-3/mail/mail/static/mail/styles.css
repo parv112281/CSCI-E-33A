@@ -1,0 +1,15 @@
+textarea {
+    min-height: 400px;
+}
+
+.email {
+    border: 1px solid black;
+}
+
+.read_email {
+    background-color: gray;
+}
+
+.email_header {
+    margin-left: 20px;
+}
