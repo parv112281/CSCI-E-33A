@@ -1,2 +1,6 @@
 Django
 psycopg2
+requests
+bs4
+lxml
+nltk
